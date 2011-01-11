@@ -6,5 +6,6 @@ setup(
     packages=find_packages(),
     author='Alen Mujezinovic',
     author_email='alen@caffeinehit.com',
+    url='https://github.com/caffeinehit/django-stream',
     version='0.1',
 )
