@@ -1,10 +1,10 @@
 from django import template
 from django.conf import settings
 from django.db import models
+from django.db.models.signals import post_save
 from django.utils.translation import ugettext as _
 from stream.registry import actor_map, target_map, action_object_map
-
-
+from stream.signals import action
 
 DEFAULT_STREAM_VERBS = (
     ('default', _('Stream Item')),
@@ -21,14 +21,14 @@ class ActionManager(models.Manager):
         return action
     
     def get_or_create(self, actor, verb, target=None, action_object=None, **kwargs):
-        result = self.filter(verb=verb) | self.get_for_actor(actor)
+        result = self.filter(verb=verb) & self.get_for_actor(actor)
         if target:
-            result = result | self.get_for_target(target)
+            result = result & self.get_for_target(target)
         if action_object:
-            result = result | self.get_for_action_object(action_object)
+            result = result & self.get_for_action_object(action_object)
         
         result = result.filter(**kwargs)
-        
+
         if result.count() == 0:
             return self.create(actor, verb, target, action_object, **kwargs), True
         if result.count() == 1:
@@ -67,7 +67,7 @@ class Action(models.Model):
     objects = ActionManager()
 
     def __unicode__(self):
-        return u'%s: %s - %s' % (self.verb, self.actor(), self.target())
+        return u'%s: %s - %s' % (self.verb, self.actor, self.target)
 
     def _get(self, map):
         for _, fname in map.values():
@@ -76,12 +76,14 @@ class Action(models.Model):
         return None
     
     def _set(self, obj, map):
+        for _, fname in map.values():
+            setattr(self, fname, None)
+
         if obj is None:
-            for _, fname in map.values():
-                setattr(self, fname, None)
-        else:
-            _, fname = map[obj.__class__]
-            setattr(self, fname, obj)
+            return
+    
+        _, fname = map[obj.__class__]
+        setattr(self, fname, obj)
 
     def _get_actor(self):
         return self._get(actor_map)
@@ -100,4 +102,8 @@ class Action(models.Model):
     target = property(fget=_get_target, fset=_set_target)
     action_object = property(fget=_get_action_object, fset=_set_action_object)
     
-   
+def action_dispatch(sender, instance, created=False, **kwargs):
+    if created:
+        action.send(sender, instance=instance)
+
+post_save.connect(action_dispatch, dispatch_uid='stream.action_dispatch', sender=Action)

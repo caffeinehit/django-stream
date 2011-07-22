@@ -2,8 +2,9 @@ from setuptools import setup, find_packages
 
 setup(
     name='django-stream',
-    description='Application providing news stream like features on django models',
-    packages=['stream'],
+    description='Activity stream application for Django',
+    long_description=open('README.rst').read(),
+    packages=['stream', 'stream.templatetags'],
     author='Alen Mujezinovic',
     author_email='alen@caffeinehit.com',
     url='https://github.com/caffeinehit/django-stream',

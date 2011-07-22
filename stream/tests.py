@@ -1,6 +1,9 @@
+from django import template
 from django.contrib.auth.models import User
 from django.test import TestCase
+from stream import signals
 from stream.models import Action
+from stream import utils
 
 class TestStream(TestCase):
     def setUp(self):
@@ -9,10 +12,17 @@ class TestStream(TestCase):
         self.morrison = User.objects.create(username='morrison')
         
     def test_create(self):
-        Action.objects.create(self.lennon, 'follow', self.hendrix)
+        obj1 = Action.objects.create(self.lennon, 'follow', self.hendrix)
         
-        obj, created = Action.objects.get_or_create(self.lennon, 'follow', self.hendrix)
+        obj2, created = Action.objects.get_or_create(self.lennon, 'follow', self.hendrix)
         self.assertEqual(False, created) 
+    
+        self.assertEqual(obj1, obj2)
+        
+        obj1 = utils.action.send(self.lennon, 'follow', self.morrison)
+        obj2, created = Action.objects.get_or_create(self.lennon, 'follow', self.morrison)
+        
+        self.assertEqual(obj1, obj2)
     
     def test_get_or_create(self):
         obj, created = Action.objects.get_or_create(self.lennon, 'follow', self.hendrix)
@@ -59,3 +69,30 @@ class TestStream(TestCase):
         self.assertEqual(self.morrison, action.actor)
         self.assertEqual(self.hendrix, action.target)
         self.assertEqual(self.lennon, action.action_object)
+
+    def test_signals(self):
+        handler = type('Handler', (object,), {
+            'inc': lambda self: setattr(self, 'i', getattr(self, 'i') + 1),
+            'i': 0
+        })()
+        
+        def action_handler(instance, **kwargs):
+            self.assertEqual(self.lennon, instance.actor)
+            self.assertEqual(self.hendrix, instance.target)
+            self.assertEqual(self.morrison, instance.action_object)
+            handler.inc()
+        
+        signals.action.connect(action_handler)
+            
+        utils.action.send(self.lennon, 'follow', self.hendrix, action_object=self.morrison)
+        
+        self.assertEqual(1, handler.i)
+
+    def test_template_tag(self):
+        tpl = template.Template("""{% load stream_tags %}{% render_action action %}""")
+        
+        action = utils.action.send(self.lennon, 'default', self.hendrix)
+        
+        ctx = template.Context({'action': action})
+        
+        self.assertEqual("lennon did Stream Item hendrix.", tpl.render(ctx))

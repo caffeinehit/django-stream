@@ -44,3 +44,14 @@ register_action_object = __register('action_%s', 'acted_%s', action_object_regis
     action_object_map)
 
 
+
+class action(object):
+    @classmethod
+    def send(cls, actor, verb, target=None, action_object=None, description=None):
+        """
+        Create an action
+        """
+        return Action.objects.create(actor, verb, target, action_object,
+            description=description)
+    
+
