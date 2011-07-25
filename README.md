@@ -3,7 +3,10 @@
 django-stream provides activity streams for Django applications. 
 
 It differs from 
-[django-activity-stream](https://github.com/justquick/django-activity-stream) in that it does not use generic relations and does not provide a `Follow` object, but it can be used together with [django-follow](https://github.com/caffeinehit/django-follow).
+[django-activity-stream](https://github.com/justquick/django-activity-stream) in that it does not use generic relations and does not provide a `Follow` object, but it can be used together with [django-follow](https://github.com/caffeinehit/django-follow). 
+
+The motivation to not use generic relations is to cut down on SQL queries and make it nice and simple to do cross table joins.
+
 
 ## Installation
 

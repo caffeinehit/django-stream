@@ -9,6 +9,9 @@ in that it does not use generic relations and does not provide a
 ``Follow`` object, but it can be used together with
 `django-follow <https://github.com/caffeinehit/django-follow>`_.
 
+The motivation to not use generic relations is to cut down on SQL
+queries and make it nice and simple to do cross table joins.
+
 Installation
 ------------
 
