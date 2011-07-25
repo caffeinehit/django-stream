@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages
+import stream
 
 setup(
     name='django-stream',
@@ -8,7 +9,7 @@ setup(
     author='Alen Mujezinovic',
     author_email='alen@caffeinehit.com',
     url='https://github.com/caffeinehit/django-stream',
-    version='0.2',
+    version=stream.__version__,
     include_package_data=True,
     zip_safe=False,
     package_data={'stream': ['templates/stream/*.html'], }
