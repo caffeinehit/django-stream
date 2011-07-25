@@ -92,7 +92,7 @@ Manager
     Similar to above, but acts on a list of action objects.
 
 Hint
-''''
+^^^^
 
 The generated fields on the ``Action`` model follow a simple pattern:
 

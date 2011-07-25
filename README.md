@@ -73,7 +73,7 @@ Clone the repository and cd into the project folder:
 * `ActionManager.get_for_action_objects(objects)`:  
   Similar to above, but acts on a list of action objects.
 
-##### Hint
+#### Hint
 
 The generated fields on the `Action` model follow a simple pattern:
 
