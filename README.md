@@ -73,6 +73,20 @@ Clone the repository and cd into the project folder:
 * `ActionManager.get_for_action_objects(objects)`:  
   Similar to above, but acts on a list of action objects.
 
+##### Hint
+
+The generated fields on the `Action` model follow a simple pattern:
+
+  `"%(field_prefix)s_%(model_name)s"`
+
+Meaning, if you've registered the `User` model both as actor and as target,
+you could run custom queries like this:
+
+  Action.objects.filter(action_user = User.objects.filter(username__startswith = 'a'))
+  Action.objects.filter(target_user = User.objects.filter(username__startswith = 'b'))
+
+
+
 ### Utils
 
 * `stream.utils.register_actor(Model)`:  
