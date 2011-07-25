@@ -1,9 +1,16 @@
 from django import template
-from django.contrib.auth.models import User
+from django.conf import settings
+from django.contrib.auth.models import User, Group
 from django.test import TestCase
 from stream import signals
 from stream.models import Action
 from stream import utils
+
+
+utils.register_actor([User, Group])
+utils.register_target([User, Group])
+utils.register_action_object([User, Group])
+
 
 class TestStream(TestCase):
     def setUp(self):
@@ -64,7 +71,7 @@ class TestStream(TestCase):
         action.action_object = self.lennon
         action.save()
         
-        action = Action.objects.get(id=1)
+        action = Action.objects.get(id=action.id)
         
         self.assertEqual(self.morrison, action.actor)
         self.assertEqual(self.hendrix, action.target)
@@ -96,3 +103,36 @@ class TestStream(TestCase):
         ctx = template.Context({'action': action})
         
         self.assertEqual("lennon did Stream Item hendrix.", tpl.render(ctx))
+    
+    def test_multi_lookups(self):
+        def target_result():
+            return len(Action.objects.get_for_targets([self.lennon, self.hendrix, self.morrison]))
+        def actor_result():
+            return len(Action.objects.get_for_actors([self.lennon, self.hendrix, self.morrison]))
+        
+        self.assertEqual(0, target_result())
+        self.assertEqual(0, actor_result())
+        
+        utils.action.send(self.lennon, 'follow', self.hendrix)
+        self.assertEqual(1, target_result())
+        self.assertEqual(1, actor_result())
+
+        utils.action.send(self.lennon, 'follow', self.morrison)
+        self.assertEqual(2, target_result())
+        self.assertEqual(2, actor_result())
+
+        utils.action.send(self.hendrix, 'follow', self.morrison)
+        self.assertEqual(3, target_result())
+        self.assertEqual(3, actor_result())
+
+        utils.action.send(self.hendrix, 'follow', self.lennon)
+        self.assertEqual(4, target_result())
+        self.assertEqual(4, actor_result())
+
+        self.assertEqual(2, Action.objects.get_for_actors([self.lennon]).count())
+        self.assertEqual(2, Action.objects.get_for_actors([self.hendrix]).count())
+        self.assertEqual(0, Action.objects.get_for_actors([self.morrison]).count())
+        
+        self.assertEqual(1, Action.objects.get_for_targets([self.hendrix]).count())
+        self.assertEqual(1, Action.objects.get_for_targets([self.lennon]).count())
+        self.assertEqual(2, Action.objects.get_for_targets([self.morrison]).count())

@@ -58,11 +58,20 @@ Clone the repository and cd into the project folder:
 * `ActionManager.get_for_actor(actor)`:  
   Returns all the `Action` objects involving `actor`
 
+* `ActionManager.get_for_actors(actors)`:  
+  Similar to above, but acts on a list of actors
+
 * `ActionManager.get_for_target(target)`:  
   Returns all the `Action` objects involving `target`
 
+* `ActionManager.get_for_targets(targets)`:  
+  Similar to above, but acts on a list of targets
+
 * `ActionManager.get_for_action_object(obj)`:   
   Returns all the `Action` objects involving `obj`
+
+* `ActionManager.get_for_action_objects(objects)`:  
+  Similar to above, but acts on a list of action objects.
 
 ### Utils
 

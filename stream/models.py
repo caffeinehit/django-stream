@@ -35,20 +35,45 @@ class ActionManager(models.Manager):
             return result[0], False
         raise Action.MultipleObjectsReturned
     
+    def _multi_lookup(self, objects, method):
+        result = method(objects[0])
+        for obj in objects[1:]:
+            result = result | method(obj)
+        return result
+    
     def get_for_actor(self, actor):
         """ Returns all objects involving `actor` """
         _, f_name = actor_map[actor.__class__]
         return self.filter(**{f_name:actor})
+    
+    def get_for_actors(self, actors):
+        """ 
+        Similar to `get_for_actor` - but does lookups for multiple actors.
+        """
+        return self._multi_lookup(actors, self.get_for_actor)
     
     def get_for_target(self, target):
         """ Returns all objects involving `target` """
         _, f_name = target_map[target.__class__]
         return self.filter(**{f_name: target})
     
+    def get_for_targets(self, targets):
+        """ 
+        Similar to `get_for_target` - but does lookups for multiple targets.
+        """
+        return self._multi_lookup(targets, self.get_for_target)
+    
     def get_for_action_object(self, obj):
         """ Returns all objects involving `obj` """
         _, f_name = action_object_map[obj.__class__]
         return self.filter(**{f_name: obj})
+    
+    def get_for_action_objects(self, objects):
+        """ 
+        Similar to `get_for_action_object` - but does lookups for multiple 
+        action objects.
+        """
+        return self._multi_lookup(objects, self.get_for_action_object)
 
 class Action(models.Model):
     """
