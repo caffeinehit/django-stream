@@ -40,7 +40,7 @@ def __register(_field_name, _related_name, _registry, _model_map):
 
 register_actor = __register('actor_%s', 'actions_%s', actor_registry, actor_map)
 register_target = __register('target_%s', 'targetted_%s', target_registry, target_map)
-register_action_object = __register('action_%s', 'acted_%s', action_object_registry,
+register_action_object = __register('action_object_%s', 'acted_%s', action_object_registry,
     action_object_map)
 
 
