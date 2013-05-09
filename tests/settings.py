@@ -1,4 +1,4 @@
-# Django settings for test_project project.
+# Django settings for tests project.
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -100,7 +100,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
 )
 
-ROOT_URLCONF = 'test_project.urls'
+ROOT_URLCONF = 'tests.urls'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
@@ -114,9 +114,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
 
-    'app',
+    'tests.app',
     'stream'
 )
 

@@ -1,51 +1,64 @@
 # django-stream
 
+[![Build Status](https://travis-ci.org/caffeinehit/django-stream.png?branch=master)](https://travis-ci.org/caffeinehit/django-stream)
+
 django-stream provides activity streams for Django applications. 
 
 It differs from 
 [django-activity-stream](https://github.com/justquick/django-activity-stream) in that it does not use generic relations and does not provide a `Follow` object, but it can be used together with [django-follow](https://github.com/caffeinehit/django-follow). 
 
-The motivation to not use generic relations is to cut down on SQL queries and make it nice and simple to do cross table joins.
+The motivation to not use generic relations is for simplicity reasons.
 
 
 ## Installation
 
-    pip install django-stream
+```bash
+pip install django-stream
+```
 
 ## Configuration
 
 * In your `settings.py` add stream types:
 
-        INSTALLED_APPS += ('stream', )
-        
-        STREAM_VERBS = (
-            ('default', 'Stream Item'),
-            ('edit', 'Object edited'),
-            ('created','Object created'),
-            ('deleted','Object deleted'),
-            ('followed', 'Object followed'),
-        )
+```python
+INSTALLED_APPS += ('stream', )
+
+STREAM_VERBS = (
+	('default', 'Stream Item'),
+    ('edit', 'Object edited'),
+    ('created','Object created'),
+    ('deleted','Object deleted'),
+    ('followed', 'Object followed'))
+``` 
+
 
 * Register the models you want to be able to tag in your streams:
 
-        from django.db import models
-        from stream import utils
+```python
+from django.db import models
+from stream import utils
 
-        class MyModel(models.Model):
-            field = models.CharField(max_length = 255)
+class MyModel(models.Model):
+field = models.CharField(max_length = 255)
 
-        utils.register_actor(MyModel)
-        utils.register_target(MyModel)
-        utils.register_action_object(MyModel)
+utils.register_actor(MyModel)
+utils.register_target(MyModel)
+utils.register_action_object(MyModel)
+```
 
-## Test
+## Testing
 
-The repository includes a sample project and application that is configured to test `django-stream`.
+Run tox.
 
-Clone the repository and cd into the project folder:
+```bash
+$ git clone https://github.com/caffeinehit/django-stream.git && cd django-stream && tox
+[...]
+```
 
-    cd test_project/
-    python manage.py test stream
+## Example
+
+The repository contains an example project and application making use
+of `django-stream` in the `test/` folder. 
 
 
 ## API
@@ -55,7 +68,7 @@ Clone the repository and cd into the project folder:
 * `ActionManager.create(actor, verb, target=None, action_object=None, **kwargs)`:  
   Create a new action object
 
-* `ActionManager.get_or_create(actor, verb, target=None, action_object=None, **kwargs)` :  
+* `ActionManager.get_or_create(actor, verb, target=None, action_object=None, **kwargs)`:  
   Returns a tuple `(Action, bool)`
 
 * `ActionManager.get_for_actor(actor)`:  
@@ -80,15 +93,18 @@ Clone the repository and cd into the project folder:
 
 The generated fields on the `Action` model follow a simple pattern:
 
-    `"%(field_prefix)s_%(model_name)s"`
+```python
+"%(field_prefix)s_%(model_name)s"
+```
 
 Meaning, if you've registered the `User` model as actor target and as
 action object, you could run custom queries like this:
 
-    Action.objects.filter(actor_user = User.objects.filter(username__startswith = 'a'))
-    Action.objects.filter(target_user = User.objects.filter(username__startswith = 'b'))
-    Action.objects.filter(action_object_user = User.objects.filter(username__startswith = 'c'))
-
+```python
+Action.objects.filter(actor_user = User.objects.filter(username__startswith = 'a'))
+Action.objects.filter(target_user = User.objects.filter(username__startswith = 'b'))
+Action.objects.filter(action_object_user = User.objects.filter(username__startswith = 'c'))
+```
 
 
 ### Utils
@@ -109,8 +125,10 @@ action object, you could run custom queries like this:
 
 There is one template tag that attempts to render a given action:
 
-    {% load stream_tags %}
-    {% render_action action %}
+```django
+{% load stream_tags %}
+{% render_action action %}
+``` 
 
 The template tag will try to find `stream/<action.verb>.html` and if it fails render the default template `stream/action.html`.
 
@@ -118,12 +136,11 @@ The template tag will try to find `stream/<action.verb>.html` and if it fails re
 
 There is one signal that is fired when new actions are created:
 
-`stream.signals.action(instance)`
+```python
+stream.signals.action(instance)
+```
 
 
---------------------
 
-
-[@flashingpumpkin](http://twitter.com/flashingpumpkin)
 
 
